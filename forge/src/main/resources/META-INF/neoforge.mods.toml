@@ -49,3 +49,8 @@ mandatory=false
 versionRange="[${minecraft_version}-${voicechat_api_version},)"
 ordering="AFTER"
 side="BOTH"
+
+[[mixins]]
+config="railways-common.mixins.json"
+[[mixins]]
+config="railways.mixins.json"

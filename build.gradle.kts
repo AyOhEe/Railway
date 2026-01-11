@@ -40,11 +40,11 @@ plugins {
     java
     `maven-publish`
     id("architectury-plugin") version "3.4-SNAPSHOT"
-    id("dev.architectury.loom") version "1.11.+" apply false
+    id("dev.architectury.loom") version "1.13.+" apply false
     id("me.modmuss50.mod-publish-plugin") version "0.7.4" apply false // https://github.com/modmuss50/mod-publish-plugin
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
-    id("dev.ithundxr.silk") version "0.11.15" // https://github.com/IThundxr/silk
-    id("net.kyori.blossom") version "2.1.0" apply false // https://github.com/KyoriPowered/blossom
+    id("dev.ithundxr.silk") version "1.0.1" // https://github.com/IThundxr/silk
+    id("net.kyori.blossom") version "2.2.0" apply false // https://github.com/KyoriPowered/blossom
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.8" // https://github.com/JetBrains/gradle-idea-ext-plugin
 }
 
@@ -89,6 +89,7 @@ allprojects {
 
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
+        options.release = 21
     }
 
     java {
@@ -102,8 +103,7 @@ subprojects {
 
     setupRepositories()
 
-    val capitalizedName =
-        project.name.replaceFirstChar { it.uppercase() }
+    val capitalizedName = getCapitalizedName()
 
     val loom = project.extensions.getByType<LoomGradleExtensionAPI>()
     loom.apply {
@@ -275,14 +275,13 @@ subprojects {
     configure<ModPublishExtension> {
         file.set(remapJar.get().archiveFile)
         version.set(project.version.toString())
-        changelog = ChangelogText.getChangelogText(rootProject).toString()
+        changelog = ChangelogText.toString()
         type = releaseType
         displayName = "Steam 'n' Rails ${"mod_version"()} $capitalizedName ${"minecraft_version"()}"
         if (isFabric) {
             modLoaders.add("fabric")
             modLoaders.add("quilt")
         } else {
-            modLoaders.add("forge")
             modLoaders.add("neoforge")
         }
 
@@ -393,9 +392,9 @@ fun <T> getValueFromAnnotation(annotation: AnnotationNode?, key: String): T? {
 tasks.register("railwaysPublish") {
     when (val platform = System.getenv("PLATFORM")) {
         "both" -> {
-            dependsOn(tasks.build, ":fabric:publish", ":forge:publish", ":common:publish", ":fabric:publishMods", ":forge:publishMods")
+            dependsOn(tasks.build, ":fabric:publish", ":neoforge:publish", ":common:publish", ":fabric:publishMods", ":neoforge:publishMods")
         }
-        "fabric", "forge" -> {
+        "fabric", "neoforge" -> {
             dependsOn("${platform}:build", "${platform}:publish", "${platform}:publishMods")
         }
     }
@@ -417,7 +416,7 @@ fun Project.setupRepositories() {
                 includeGroup("com.tterrag.registrate")
             }
         }
-        maven("https://maven.maxhenkel.de/repository/public") // Simple Voice Chat
+        maven("https://maven.maxhenkel.de/releases") // Simple Voice Chat
         maven("https://maven.jamieswhiteshirt.com/libs-release") // Reach Entity Attributes
         exclusiveMaven("https://thedarkcolour.github.io/KotlinForForge/", "thedarkcolour") // KFF (Hex Casting dependency)
         maven("https://maven.terraformersmc.com/releases/") // Mod Menu, EMI
@@ -491,3 +490,10 @@ operator fun String.invoke(): String {
         ?: throw IllegalStateException("Property $this is not defined")
 }
 
+fun getCapitalizedName(): String {
+    when (project.name) {
+        "fabric" -> return "Fabric"
+        "forge", "neoforge" -> return "NeoForge"
+        else -> return "ProjectNameUnrecognized"
+    }
+}

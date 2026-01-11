@@ -57,7 +57,9 @@ dependencies {
     include("com.github.Chocohead:Fabric-ASM:v2.3")
 
     // Development QOL
-    modLocalRuntime("maven.modrinth:lazydfu:${"lazydfu_version"()}")
+    if ("enable_ldfu"().toBoolean()) {
+        modLocalRuntime("maven.modrinth:lazydfu:${"lazydfu_version"()}")
+    }
     modLocalRuntime("com.terraformersmc:modmenu:${"modmenu_version"()}")
 
     modLocalRuntime("dev.emi:emi-fabric:${"emi_version"()}")

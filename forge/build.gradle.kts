@@ -19,27 +19,26 @@
 import dev.ithundxr.silk.ChangelogText
 import me.modmuss50.mpp.ReleaseType
 
-architectury.forge()
+architectury.neoForge()
 
 loom {
     val common = project(":common")
     accessWidenerPath = common.loom.accessWidenerPath
 
-    forge {
-        mixinConfig("railways-common.mixins.json")
-        mixinConfig("railways.mixins.json")
+    //NOTE this may bite me in the ass later. Can't know until Loom isn't mad.
+//    forge {
+//        convertAccessWideners = true
+//        extraAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
+//    }
 
-        convertAccessWideners = true
-        extraAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
-    }
-
+    // Discouraged - consider removing
     runs.configureEach {
         programArg("-mixin.config=create.mixins.json")
     }
 }
 
 dependencies {
-    forge("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
+    neoForge("net.neoforged:neoforge:${"forge_version"()}")
 
     // Create and its dependencies
     modImplementation("com.simibubi.create:create-${"minecraft_version"()}:${"create_forge_version"()}:slim") { isTransitive = false }
@@ -47,6 +46,12 @@ dependencies {
     modImplementation("com.tterrag.registrate:Registrate:${"registrate_forge_version"()}")
     modCompileOnly("dev.engine-room.flywheel:flywheel-forge-api-${"minecraft_version"()}:${"flywheel_version"()}")
     modRuntimeOnly("dev.engine-room.flywheel:flywheel-forge-${"minecraft_version"()}:${"flywheel_version"()}")
+
+    modImplementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    modImplementation("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}")
+    modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")
+    modCompileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
+    modRuntimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
 
     // Development QOL
     modLocalRuntime("dev.emi:emi-forge:${"emi_version"()}")
